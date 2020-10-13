@@ -17,6 +17,11 @@ import time
 #             index_task[i]=index_task[i+1]
 #             index_task[i+1]=middlemen_task
 #     return index_task
+def tournament(population):
+    a=np.random.randint(len(population),size=5)
+    a=np.array(population)[a]
+    minp=min(a,key=lambda x:fitness_function(x)[0])    
+    return minp
 def queue_of_task(index_task,index):
     for i in range(len(index_task)-1):
         for j in range(1,len(index_task)):
@@ -29,7 +34,7 @@ def queue_of_task(index_task,index):
 #mở dữ liệu khởi tạo các thiết bị tính toán(20 mvns,1 mecserver,1 remotecloud) và tập các công việc (100 task)
 with open("./data/fog_device.p","rb") as fog:
     mvns,mecServer,remoteCloud=pickle.load(fog)
-with open("./data/task2.p","rb") as data:
+with open("./data/task.p","rb") as data:
     tasks=pickle.load(data)
 
 
@@ -114,7 +119,7 @@ Sử dụng thuật toán GA cho bài toán.
 @para number_loop: số vòng lặp để tìm giá trị tối ưu
 @para cut_poins: số điểm cắt khi lai ghép
 """
-files=open("./result/1_1_2000.csv","w")
+files=open("./result/tlm_1_100_1000_13_10.csv","w")
 
 def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,cut_points:int):
     aaa=list()
@@ -139,7 +144,7 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
 
 
     for i in range(number_loop):
-        print(i)
+        #print(i)
         #lai ghép
         new_population=[]
         for j in range(int(init_size_population/2)):
@@ -147,8 +152,8 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
             #lai ghép điểm cắt
             if cut_points==1:
                 index=np.random.randint(1,len(initialization),size=2)
-                first_individual=population[index[0]]
-                second_individual=population[index[1]]
+                first_individual=tournament(population)
+                second_individual=tournament(population)
                 point=np.random.randint(2,total_task-1)
                 new_individual=np.concatenate((first_individual[0:point+1],second_individual[point+1:total_task]))
                 new_individual1=np.concatenate((second_individual[0:point+1],first_individual[point+1:total_task]))
@@ -156,8 +161,8 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
             #lai ghép điểm cắt
             else:
                 index=np.random.randint(1,len(population),size=2)
-                m=population[index[0]]
-                n=population[index[1]]
+                m=tournament(population)
+                n=tournament(population)
                 point=np.random.randint(3,99)
                 point1=np.random.randint(2,point)
                 new_individual=np.concatenate((m[0:point1+1],n[point1+1:point+1],m[point+1:100]))
@@ -210,10 +215,10 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
             files.write(str(kkk[iii])+",")
         files.write("\n")
 
-for j in range (1):
+for j in range (20):
 
-
-    GA(100,2000,22,100,1)
+    print("a")
+    GA(100,1000,22,100,1)
 
 
     files.write("\n")
