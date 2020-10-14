@@ -8,6 +8,8 @@ import Server
 import Cloud_remote
 import sys
 import time
+import concurrent.futures
+
 
 #khoi tao ca the init individual
 # def queue_of_task(index_task):
@@ -196,7 +198,7 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
        
         opt=fitness_function(optimize_individual)
         aaa.append([opt[1],opt[2],opt[0]])
-    times=time.time()-first
+    return aaa
     print(times)
     files.write("times,"+str(times)+"\n")
     files.write("cloud,"+str(opt[3])+"\n")
