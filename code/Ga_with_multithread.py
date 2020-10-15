@@ -23,7 +23,7 @@ class GA:
         with open("./data/task.p","rb") as data:
             self.tasks=pickle.load(data)
         self.population=[]
-        self.files=open("./result/tlm_1_100_1000_13_10.csv","w")
+        self.files=open("./result/tlm_2_100_1000_13_10.csv","w")
         self.optimize_value=None
         self.optimize_individual=None
         self.new_population=None
@@ -203,5 +203,5 @@ class GA:
         for i in range(self.running_loop):
             self.active_GA(1)
         self.files.close()
-FUZZY=GA(100,1000,22,100,1,20)
+FUZZY=GA(100,1000,22,100,2,20)
 FUZZY.run_GA()
