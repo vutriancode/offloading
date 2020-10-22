@@ -23,7 +23,7 @@ class GA:
         with open("./data/task.p","rb") as data:
             self.tasks=pickle.load(data)
         self.population=[]
-        self.files=open("./result/tlm_1_100_1000_13_10.csv","w")
+        self.files=open("./result/tlm_3_100_1000_13_10.csv","w")
         self.optimize_value=None
         self.optimize_individual=None
         self.new_population=None
@@ -32,6 +32,32 @@ class GA:
         a=np.array(population)[a]
         minp=min(a,key=lambda x:self.fitness_function(x)[0])    
         return minp
+
+    def sum_fitness_value(self, population):
+        total = 0.0
+        for individual in population:
+            fitness_value = self.fitness_function(individual)[0]
+            total += fitness_value
+        return total
+
+
+    def roulette_select(self, total_fitness, population):
+        fitness_slice = np.random.rand() * total_fitness
+        fitness_so_far = 0.0
+        for i, individual in enumerate(population):
+            fitness_so_far += self.fitness_function(individual)[0]
+            if fitness_so_far >= fitness_slice:
+                return i
+        return 0
+
+    def uniform_crossover(self, parent_1, parent_2):
+        offspring1 = copy.deepcopy(parent_1)
+        offspring2 = copy.deepcopy(parent_2)
+        for i in range(len(parent_1)):
+            if np.random.rand() < 0.5:
+                offspring1[i] = parent_2[i]
+                offspring2[i] = parent_1[i]
+        return offspring1, offspring2
 
 
     def queue_of_task(self,index_task,index):
@@ -58,30 +84,75 @@ class GA:
                 self.optimize_individual=copy.deepcopy(individual)
 
         self.population=initialization
-    def Crossover(self,J):
+    def Crossover(self,J, total_fitness_value):
         #lai ghép điểm cắt
         if self.cut_points==1:
             #index=np.random.randint(1,len(initialization),size=2)
-            first_individual=self.tournament(self.population)
-            second_individual=self.tournament(self.population)
+            # first_individual=self.tournament(self.population)
+            # second_individual=self.tournament(self.population)
+            # point=np.random.randint(2,self.total_task-1)
+            # new_individual=np.concatenate((first_individual[0:point+1],second_individual[point+1:self.total_task]))
+            # new_individual1=np.concatenate((second_individual[0:point+1],first_individual[point+1:self.total_task]))
+
+            index_0 = self.roulette_select(total_fitness_value, self.population)
+            index_1 = self.roulette_select(total_fitness_value, self.population)
+            while index_0 == index_1:
+                index_1 = self.roulette_select(total_fitness_value, self.population)
+            first_individual=self.population[index_0] #parent_1
+            second_individual=self.population[index_1] #parent_2
             point=np.random.randint(2,self.total_task-1)
             new_individual=np.concatenate((first_individual[0:point+1],second_individual[point+1:self.total_task]))
             new_individual1=np.concatenate((second_individual[0:point+1],first_individual[point+1:self.total_task]))
 
+
+
         #lai ghép điểm cắt
-        else:
-            #index=np.random.randint(1,len(population),size=2)
-            m=self.tournament(self.population)
-            n=self.tournament(self.population)
+        # else:
+        #     #index=np.random.randint(1,len(population),size=2)
+        #     m=self.tournament(self.population)
+        #     n=self.tournament(self.population)
+            # point=np.random.randint(3,99)
+            # point1=np.random.randint(2,point)
+            # new_individual=np.concatenate((m[0:point1+1],n[point1+1:point+1],m[point+1:100]))
+            # new_individual1=np.concatenate((n[0:point1+1],m[point1+1:point+1],n[point+1:100]))
+        
+        elif self.cut_points == 2:
+
+            # index=np.random.randint(1,len(population),size=2)
+            # m=population[index[0]]
+            # n=population[index[1]]
+
+            # roulette wheel selection
+            index_0 = self.roulette_select(total_fitness_value, self.population)
+            index_1 = self.roulette_select(total_fitness_value, self.population)
+            while index_0 == index_1:
+                index_1 = self.roulette_select(total_fitness_value, self.population)
+            m = self.population[index_0] #parent_1
+            n = self.population[index_1] #parent_2
             point=np.random.randint(3,99)
             point1=np.random.randint(2,point)
             new_individual=np.concatenate((m[0:point1+1],n[point1+1:point+1],m[point+1:100]))
             new_individual1=np.concatenate((n[0:point1+1],m[point1+1:point+1],n[point+1:100]))
+
+
+            
+        else:
+            index_0 = self.roulette_select(total_fitness_value, self.population)
+            index_1 = self.roulette_select(total_fitness_value, self.population)
+            while index_0 == index_1:
+                index_1 = self.roulette_select(total_fitness_value, self.population)
+            parent_1 = self.population[index_0] 
+            parent_2 = self.population[index_1] 
+            new_individual, new_individual1 = self.uniform_crossover(parent_1, parent_2)
+        
+
         if(self.check(new_individual)):
             self.new_population.append(new_individual)
         if(self.check(new_individual1)):
             self.new_population.append(new_individual1)
         #return new_population
+
+
     def Mutation(self,J):
         location=np.random.randint(0,self.total_task,size=1)
         value=np.random.randint(0,self.total_server,size=1)-1
@@ -171,8 +242,9 @@ class GA:
         opt=None
         for i in range(self.number_loop):
             self.new_population=[]
+            total_fitness_value = self.sum_fitness_value(self.population)
             for kk in range(int(self.init_size_population/2)):
-                self.Crossover(1)
+                self.Crossover(1, total_fitness_value)
             for j in range(int(self.init_size_population/10)):
                 self.Mutation(1)
             self.new_population=np.array(self.new_population)
@@ -203,5 +275,5 @@ class GA:
         for i in range(self.running_loop):
             self.active_GA(1)
         self.files.close()
-FUZZY=GA(100,1000,22,100,1,20)
+FUZZY=GA(100,1000,22,100,2,1)
 FUZZY.run_GA()
