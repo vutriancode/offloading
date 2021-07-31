@@ -27,6 +27,7 @@ from config import Config
 #
 
 def queue_of_task(index_task, index):
+    mvns = mvns_org[:Config.N_NODES - 2]
     for i in range(len(index_task) - 1):
         for j in range(1, len(index_task)):
             if tasks[index_task[i]].get_di() / (1000 * Config.Rm) * 8 + tasks[index_task[i]].get_res() / (
@@ -41,14 +42,17 @@ def queue_of_task(index_task, index):
 
 # mở dữ liệu khởi tạo các thiết bị tính toán(20 mvns,1 mecserver,1 remotecloud) và tập các công việc (100 task)
 with open("./data/fog_device.p", "rb") as fog:
-    mvns, mecServer, remoteCloud = pickle.load(fog)
+    # mvns, mecServer, remoteCloud = pickle.load(fog)
+    mvns_org, mecServer, remoteCloud = pickle.load(fog)
 with open("./data/task.p", "rb") as data:
     tasks = pickle.load(data)
 
 
 def check(individual):
     individual = individual.argmax(axis=0) - 1
-    mvn_s = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    # mvn_s = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    mvn_s = [[] for _ in range(Config.N_NODES - 2)]
+    mvns = mvns_org[:Config.N_NODES - 2]
     isAccept = True
 
     for index, node in enumerate(individual):
@@ -70,7 +74,9 @@ def fitness_function(particle):
     individual = individual.argmax(axis=0) - 1
     cost = 0
     time = 0
-    mvn_s = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    # mvn_s = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    mvn_s = [[] for _ in range(Config.N_NODES - 2)]
+    mvns = mvns_org[:Config.N_NODES - 2]
     server = []
     remote_Cloud = []
     for index, node in enumerate(individual):
@@ -125,6 +131,10 @@ def my_fitness_fn(particle):
 
 
 if __name__ == '__main__':
+
+    Config.N_NODES = 10
+    Config.N_TASKS = 50
+
     search_space = Space(Config.N_PARTICLES, fitness_function, Config.W, Config.C1, Config.C2)
     particles = [Particle(check, Config.N_NODES, Config.N_TASKS, Config.V_MAX) for _ in range(search_space.n_particles)]
     search_space.particles = particles
