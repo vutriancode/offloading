@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from config import Config
 from pandas import DataFrame
@@ -58,14 +60,21 @@ class Space(object):
             particle.velocity = 20 * np.random.uniform(-1, 1) * particle.velocity
             particle.move()
 
-    def search(self, n_iterations, n_jump=10):
+    def search(self, n_iterations, n_jump=10, print_time=100):
         result = []
         iteration = 1
         history = []
+        start_time = time.time()
         while iteration <= n_iterations:
+
+            if time.time() - start_time >= print_time:
+                print('iteration {}/{}: gbest_value = {}, time = {}, cost = {}'. \
+                      format(iteration, n_iterations, self.gbest_value, self.gbest_evaluate[1], self.gbest_evaluate[2]))
+                start_time = time.time()
+
             self.update_pbest_gbest()
-            print('iteration {}/{}: gbest_value = {}, time = {}, cost = {}'. \
-                  format(iteration, n_iterations, self.gbest_value, self.gbest_evaluate[1], self.gbest_evaluate[2]))
+            # print('iteration {}/{}: gbest_value = {}, time = {}, cost = {}'. \
+            #       format(iteration, n_iterations, self.gbest_value, self.gbest_evaluate[1], self.gbest_evaluate[2]))
             self.move_particles()
 
             history.append(self.gbest_value)

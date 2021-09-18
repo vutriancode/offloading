@@ -49,6 +49,7 @@ with open("./data/task.p", "rb") as data:
 
 
 def check(individual):
+    # print("Duc test {}".format(Config.N_NODES))
     individual = individual.argmax(axis=0) - 1
     # mvn_s = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
     mvn_s = [[] for _ in range(Config.N_NODES - 2)]
@@ -131,14 +132,17 @@ def my_fitness_fn(particle):
 
 
 if __name__ == '__main__':
+    import threading
 
-    Config.N_NODES = 10
-    Config.N_TASKS = 50
+    Config.N_NODES = 6
+    Config.N_TASKS = 10
 
     search_space = Space(Config.N_PARTICLES, fitness_function, Config.W, Config.C1, Config.C2)
     particles = [Particle(check, Config.N_NODES, Config.N_TASKS, Config.V_MAX) for _ in range(search_space.n_particles)]
     search_space.particles = particles
-    result = search_space.search(Config.N_ITERATIONS)
+
+    result = search_space.search(Config.N_ITERATIONS, print_time=5)
+    # print(search_space.gbest_position)
     result.to_csv('./result/PSO_improve_1.csv', index=False)
 
 
