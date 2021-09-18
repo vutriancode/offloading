@@ -36,7 +36,7 @@ def queue_of_task(index_task,index):
 #mở dữ liệu khởi tạo các thiết bị tính toán(20 mvns,1 mecserver,1 remotecloud) và tập các công việc (100 task)
 with open("./data/fog_device.p","rb") as fog:
     mvns,mecServer,remoteCloud=pickle.load(fog)
-with open("./data/task.p","rb") as data:
+with open("./data/task1.p","rb") as data:
     tasks=pickle.load(data)
 
 
@@ -122,10 +122,17 @@ Sử dụng thuật toán GA cho bài toán.
 @para cut_poins: số điểm cắt khi lai ghép
 """
 files=open("./result/tlm_1_100_1000_13_10.csv","w")
-
+time_start = time.time()
+time_check = time.time()
+files1 = open("ga.txt","w")
+x_max  = []
+c_max  = []
 def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,cut_points:int):
     aaa=list()
     #khởi tạo quần thể
+    global time_check
+    global time_start
+    global files1
     initialization=[]
     first = time.time()
     for i in range(init_size_population):
@@ -145,7 +152,7 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
     population=initialization
 
 
-    for i in range(number_loop):
+    while time.time()- time_start<=10000:
         #print(i)
         #lai ghép
         new_population=[]
@@ -198,26 +205,29 @@ def GA(init_size_population:int,number_loop:int,total_server:int,total_task:int,
        
         opt=fitness_function(optimize_individual)
         aaa.append([opt[1],opt[2],opt[0]])
-    return aaa
-    print(times)
-    files.write("times,"+str(times)+"\n")
-    files.write("cloud,"+str(opt[3])+"\n")
-    files.write("server,"+str(opt[4])+"\n")
-    files.write("mvn,"+str(opt[5])+"\n")
+        if time.time() - time_check>=500 and time.time()- time_start<=10000:
+            files1.write(str(aaa[-1])+"\n")
+            print(str(aaa[-1]))
+            time_check = time.time() 
 
-    for iii in range(3):
-        if iii%3==0:
-            files.write("time,")
-        if iii%3==1:
-            files.write("coss,")
-        if iii%3==2:
-            files.write("fitness,")
-        for kkk in aaa:
+    # files.write("times,"+str(times)+"\n")
+    # files.write("cloud,"+str(opt[3])+"\n")
+    # files.write("server,"+str(opt[4])+"\n")
+    # files.write("mvn,"+str(opt[5])+"\n")
 
-            files.write(str(kkk[iii])+",")
-        files.write("\n")
+    # for iii in range(3):
+    #     if iii%3==0:
+    #         files.write("time,")
+    #     if iii%3==1:
+    #         files.write("coss,")
+    #     if iii%3==2:
+    #         files.write("fitness,")
+    #     for kkk in aaa:
 
-for j in range (20):
+    #         files.write(str(kkk[iii])+",")
+    #     files.write("\n")
+
+for j in range (1):
 
     print("a")
     GA(100,1000,22,100,1)
@@ -225,3 +235,4 @@ for j in range (20):
 
     files.write("\n")
 files.close()
+files1.close()

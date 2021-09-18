@@ -99,15 +99,23 @@ def random_generate(number_of_task:int,number_of_node:int):
         x=np.random.randint(number_of_node)-1
         node.append(x)
     return node
+time_start = time.time()
+time_check = time.time()
+files1 = open("hillclimbing.txt","w")
+x_max  = []
+c_max  = []
 files=open("./result/hill_climbing100.csv","w")
 def hill_climbing(number_of_task:int,number_of_node:int):
     best_node=copy.deepcopy(random_generate(number_of_task,number_of_node))
     best_fitness=fitness_function(best_node)
     value=0
+    global time_check
+    global time_start
+    global files1
     files.write("fitness,cost,time")
     files.write(str(best_fitness[0])+","+str(best_fitness[1])+","+str(best_fitness[2]))
     files.write("\n")
-    while True:
+    while time.time()- time_start<=10000:
 
         a=random_generate(number_of_task,number_of_node)
         h=fitness_function(a)
@@ -117,12 +125,15 @@ def hill_climbing(number_of_task:int,number_of_node:int):
             value=0
             files.write(str(best_fitness[0])+","+str(best_fitness[1])+","+str(best_fitness[2]))
             files.write("\n")
-
+        if time_check -time.time()>=500:
+            time_check = time.time()
+            print(str(best_fitness[0])+","+str(best_fitness[1])+","+str(best_fitness[2]))
+            files1.write(str(best_fitness[0])+","+str(best_fitness[1])+","+str(best_fitness[2]))
         else:
             value+=1
         if(value>100000):
             files.close()
-            break
     return best_fitness
 
 print(hill_climbing(100,22))
+files1.close()

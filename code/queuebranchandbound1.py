@@ -41,7 +41,7 @@ def fitness_function(individual,sobus):
 
 
 min_fitness = 10000
-m=np.zeros(6)
+m=np.zeros(12)
 def kiemtra(individual,sobus):
     time=0
     kiemtra=[]
@@ -53,22 +53,36 @@ def kiemtra(individual,sobus):
         if mvns[index].get_delta_time()<i:
             return False
     return True
-
+time_start = tm.time()
+time_check = tm.time()
+files = open("brachandbound.txt","w")
+x_max  = []
+c_max  = []
 def branchandbound(i:int,du:int,sobus:int):
     if(i==sobus+1):
         m[sobus+1]=du
         global min_fitness
+        global time_start
+        global time_check
+        global files
+        global x_max
+        global c_max
         c=np.array(m,dtype=int)
         x=fitness_function(c,sobus)
         if min_fitness>x[0]:
             min_fitness=x[0]
-            print(x)
-            print(c)
+            x_max = x
+            c_max= c
+        if tm.time() - time_start <= 10000 and tm.time() - time_check>=500:
+            time_check = tm.time()
+            files.write(str(x_max)+"\n")
+            files.write(str(c_max)+"\n")
+
 
         return 0
 
     elif i==0:
-        for j in range(du,du+1):
+        for j in range(0,du+1):
             m[i]=j
             if (fitness_function(m[:i+1],sobus)[0]+0.5*(du-j)*(1/1000)*1000/(remoteCloud.get_frequency())+(du-j)*(1/1000)*(2000)/Config.R0+0.5*(du-j)*Config.cost_MVN*1000/1000<min_fitness) and kiemtra(m[:i+1],sobus):
 
@@ -80,5 +94,5 @@ def branchandbound(i:int,du:int,sobus:int):
 
                 branchandbound(i+1,du-j,sobus)
 first = tm.time()
-branchandbound(0,90,0)
-print(str(tm.time()-first))
+branchandbound(0,100,10)
+files.close()
